@@ -1,8 +1,6 @@
 import UserModel from "../models/User.js"
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
-import cookie from "cookie"
-import cookieParser from "cookie-parser"
 export const signup = async(req, res) => {
     const { body } = req
     const { username, email, password } = body
@@ -10,12 +8,6 @@ export const signup = async(req, res) => {
     if (user) return res.status(400).json({ msg: "User with that email exists" })
     const passcode = await bcrypt.hash(password, 8)
     const token= jwt.sign(email,process.env.secret)
-    res.set('Set-Cookie',cookie.serialize("token",token,{
-        httpOnly:true,
-        sameSite:'strict',
-        maxAge:3600,
-        path:"/"
-    }))
     try {
         const userData = await UserModel.create({...body, passcode })
         return res.status(201).json({ msg: "Account Created Successfully", data: userData,token })
